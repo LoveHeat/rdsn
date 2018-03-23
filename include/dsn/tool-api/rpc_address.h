@@ -68,11 +68,7 @@ public:
     static uint32_t ipv4_from_network_interface(const char *network_interface);
     ~rpc_address();
 
-    rpc_address()
-    {
-        _addr.value = 0;
-        _addr.v4.type = HOST_TYPE_INVALID;
-    }
+    rpc_address() = default;
 
     rpc_address(const rpc_address &another);
 
@@ -86,6 +82,7 @@ public:
                       "add new payload to dsn::rpc_address "
                       "to keep it sizeof(uint64_t)");
     }
+
     rpc_address(const char *host, uint16_t port) { assign_ipv4(host, port); }
 
     void assign_ipv4(uint32_t ip, uint16_t port)
@@ -121,6 +118,7 @@ public:
     std::string to_std_string() const { return std::string(to_string()); }
     bool from_string_ipv4(const char *s)
     {
+        clear();
         std::string str = std::string(s);
         auto pos = str.find_last_of(':');
         if (pos == std::string::npos)
@@ -195,7 +193,9 @@ public:
 #endif
 
 private:
-    void clear() { _addr.value = 0; }
+    // before you assign new value, must call clear() to release original value
+    // and you MUST ensure that _addr is INITIALIZED before you call this function
+    void clear();
 
 private:
     union
@@ -218,7 +218,7 @@ private:
             unsigned long long group : 62; ///< dsn_group_t
         } group;                           ///< \ref HOST_TYPE_GROUP
         uint64_t value;
-    } _addr;
+    } _addr{.value = 0};
 };
 }
 

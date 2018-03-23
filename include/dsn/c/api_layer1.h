@@ -38,7 +38,6 @@
 
 #include <dsn/c/api_common.h>
 #include <dsn/c/api_task.h>
-#include <dsn/c/api_layer1.h>
 #include <dsn/tool-api/gpid.h>
 #include <dsn/tool-api/rpc_address.h>
 

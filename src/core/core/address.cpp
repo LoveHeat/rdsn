@@ -155,24 +155,17 @@ DSN_API uint32_t rpc_address::ipv4_from_network_interface(const char *network_in
     return ret;
 }
 
-rpc_address::~rpc_address()
-{
-    switch (type()) {
-    case HOST_TYPE_URI:
-        uri_address()->release_ref();
-        break;
-    case HOST_TYPE_GROUP:
-        group_address()->release_ref();
-        break;
-    default:
-        break;
-    }
-}
+rpc_address::~rpc_address() { clear(); }
 
 rpc_address::rpc_address(const rpc_address &another) { *this = another; }
 
 rpc_address &rpc_address::operator=(const rpc_address &another)
 {
+    if (this == &another) {
+        // avoid memory leak
+        return *this;
+    }
+    clear();
     _addr = another._addr;
     switch (another.type()) {
     case HOST_TYPE_GROUP:
@@ -189,16 +182,20 @@ rpc_address &rpc_address::operator=(const rpc_address &another)
 
 void rpc_address::assign_uri(const char *host_uri)
 {
+    clear();
     _addr.uri.type = HOST_TYPE_URI;
     dsn::rpc_uri_address *addr = new dsn::rpc_uri_address(host_uri);
+    // take the lifetime of rpc_uri_address, release_ref when change value or call deconstruct
     addr->add_ref();
     _addr.uri.uri = (uint64_t)addr;
 }
 
 void rpc_address::assign_group(const char *name)
 {
+    clear();
     _addr.group.type = HOST_TYPE_GROUP;
     dsn::rpc_group_address *addr = new dsn::rpc_group_address(name);
+    // take the lifetime of rpc_uri_address, release_ref when change value or call deconstruct
     addr->add_ref();
     _addr.group.group = (uint64_t)addr;
 }
@@ -224,6 +221,21 @@ rpc_address rpc_address::clone() const
     }
 
     return new_address;
+}
+
+void rpc_address::clear()
+{
+    switch (type()) {
+    case HOST_TYPE_GROUP:
+        group_address()->release_ref();
+        break;
+    case HOST_TYPE_URI:
+        uri_address()->release_ref();
+        break;
+    default:
+        break;
+    }
+    _addr.value = 0;
 }
 
 static __thread fixed_size_buffer_pool<8, 256> bf;

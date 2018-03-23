@@ -506,8 +506,7 @@ uint32_t network::get_local_ipv4()
                                     "primary_interface",
                                     "",
                                     "network interface name used to init primary ipv4 "
-                                    "address, if empty, means using the first \"eth\" "
-                                    "prefixed non-loopback ipv4 address");
+                                    "address, if empty, means using a site local address");
 
     uint32_t ip = 0;
 
