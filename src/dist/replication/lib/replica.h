@@ -42,6 +42,7 @@
 // which is binded to this replication partition
 //
 
+#include <dsn/tool-api/uniq_timestamp_us.h>
 #include <dsn/cpp/serverlet.h>
 #include <dsn/cpp/perf_counter_wrapper.h>
 #include "dist/replication/client_lib/replication_common.h"
@@ -330,6 +331,7 @@ private:
     std::map<std::string, std::string> _extra_envs;
 
     // replica status specific states
+    uniq_timestamp_us _uniq_timestamp_us;
     primary_context _primary_states;
     secondary_context _secondary_states;
     potential_secondary_context _potential_secondary_states;

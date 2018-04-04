@@ -118,7 +118,7 @@ DSN_API uint32_t dsn_ipv4_local(const char *network_interface)
     uint32_t ret = 0;
 
     static auto is_site_local = [&](uint32_t ip_net) {
-        const char *addr = reinterpret_cast<const char *>(&ip_net);
+        const uint8_t *addr = reinterpret_cast<const uint8_t*>(&ip_net);
         return addr[0] == 10 || (addr[0] == 172 && addr[1] == 16) ||
                (addr[0] == 192 && addr[1] == 168);
     };
@@ -130,6 +130,7 @@ DSN_API uint32_t dsn_ipv4_local(const char *network_interface)
             if (i->ifa_name != nullptr && i->ifa_addr != nullptr &&
                 i->ifa_addr->sa_family == AF_INET) {
                 uint32_t ip_val = ((struct sockaddr_in *)i->ifa_addr)->sin_addr.s_addr;
+
                 if (strcmp(i->ifa_name, network_interface) == 0 ||
                     (network_interface[0] == '\0' && is_site_local(ip_val))) {
                     ret = (uint32_t)ntohl(ip_val);
